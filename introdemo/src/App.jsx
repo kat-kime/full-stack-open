@@ -1,29 +1,18 @@
-const Hello = ({ name, age }) => {
-  // props are destructured as name and age
-  const bornYear = () => {
-    return new Date().getFullYear() - age
-  }
+import { useState } from "react"
+
+const App = (props) => {
+  const [ counter, setCounter ] = useState(0)
 
   return (
     <div>
-      <p>
-        Hello {name}, you are {age} years old
-      </p>
-      <p>So you were probably born in {bornYear()}</p>
+      <div>{counter}</div>
+      <button onClick={() => setCounter(counter + 1)} >
+        plus
+      </button>
+      <button onClick={() => setCounter(0)}>
+        reset
+      </button>
     </div>
-  )
-}
-
-const App = () => {
-  const name = 'Peter'
-  const age = 10
-
-  return (
-    <>
-    <h1>Greetings</h1>
-    <Hello name="Maya" age={26+10} />
-    <Hello name={name} age={age} />
-    </>
   )
 }
 
