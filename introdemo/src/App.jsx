@@ -4,42 +4,36 @@ const Display = ({ counter }) => <div>{counter}</div>
 const Button = ({ onClick, text }) => <button onClick={onClick}>{text}</button>
 
 const App = (props) => {
-  const [clicks, setClicks] = useState({
-    left: 0,
-    right: 0
-  })
+  const [left, setLeft] = useState(0)
+  const [right, setRight] = useState(0)
 
-  const incLeft = () => setClicks({
-    ...clicks,
-    left: clicks.left + 1
-  })
+  const [allClicks, setAllClicks] = useState([])
 
-  const incRight = () => setClicks({
-    ...clicks,
-    right: clicks.right + 1
-  })
+  const incLeft = () => {
+    setLeft(left + 1)
+    setAllClicks(allClicks.concat('L'))
+  }
 
-  const reset = () => setClicks({
-    left: 0,
-    right: 0
-  })
+  const incRight = () => {
+    setRight(right + 1)
+    setAllClicks(allClicks.concat('R'))
+  }
+
+  console.log("all clicks:", allClicks)
 
   return (
     <div>
-      <Display counter={clicks.left} />
-      <Display counter={clicks.right} />
+      <Display counter={left} />
       <Button 
         onClick={incLeft}
         text='plus left' 
       />
-      <Button 
-        onClick={reset}
-        text='reset' 
-      />
+      <Display counter={right} />
       <Button
         onClick={incRight}
         text='plus right'
       />
+      <Display counter={allClicks.join('')} />
     </div>
   )
 }
