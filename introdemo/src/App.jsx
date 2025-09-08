@@ -4,22 +4,41 @@ const Display = ({ counter }) => <div>{counter}</div>
 const Button = ({ onClick, text }) => <button onClick={onClick}>{text}</button>
 
 const App = (props) => {
-  const [ counter, setCounter ] = useState(0)
+  const [clicks, setClicks] = useState({
+    left: 0,
+    right: 0
+  })
+
+  const incLeft = () => setClicks({
+    ...clicks,
+    left: clicks.left + 1
+  })
+
+  const incRight = () => setClicks({
+    ...clicks,
+    right: clicks.right + 1
+  })
+
+  const reset = () => setClicks({
+    left: 0,
+    right: 0
+  })
 
   return (
     <div>
-      <Display counter={counter} />
+      <Display counter={clicks.left} />
+      <Display counter={clicks.right} />
       <Button 
-        onClick={() => setCounter(counter + 1)} 
-        text='plus' 
+        onClick={incLeft}
+        text='plus left' 
       />
       <Button 
-        onClick={() => setCounter(0)} 
+        onClick={reset}
         text='reset' 
       />
       <Button
-        onClick={() => setCounter(counter - 1)}
-        text='minus'
+        onClick={incRight}
+        text='plus right'
       />
     </div>
   )
