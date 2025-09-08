@@ -6,31 +6,19 @@ const Button = ({ onClick, text }) => <button onClick={onClick}>{text}</button>
 const App = (props) => {
   const [ counter, setCounter ] = useState(0)
 
-  const incByOne = () => {
-    setCounter(counter + 1)
-  }
-
-  const resetToZero = () => {
-    setCounter(0)
-  }
-
-  const decByOne = () => {
-    setCounter(counter - 1)
-  }
-
   return (
     <div>
       <Display counter={counter} />
       <Button 
-        onClick={incByOne} 
+        onClick={() => setCounter(counter + 1)} 
         text='plus' 
       />
       <Button 
-        onClick={resetToZero} 
+        onClick={() => setCounter(0)} 
         text='reset' 
       />
       <Button
-        onClick={decByOne}
+        onClick={() => setCounter(counter - 1)}
         text='minus'
       />
     </div>
