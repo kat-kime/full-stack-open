@@ -1,37 +1,39 @@
 import { useState } from "react"
 
 const Button = (props) => {
+  console.log("button props:", props)
+  return (
+    <button onClick={props.onClick}>
+      {props.text}
+    </button>
+  )
+}
+
+const Result = (props) => {
+  console.log("result props:", props)
   return (
     <div>
-      <button onClick={props.onClick}>
-       {props.text} 
-      </button>
+     {props.text}
     </div>
   )
 }
 
-const App = (props) => {
-  const [value, setValue] = useState(10)
-
-  const handleOnClick = () => {
-    setValue(0)
-  }
+const App = () => {
+  const [good, setGood] = useState(0)
+  const [bad, setBad] = useState(0)
+  const [neutral, setNeutral] = useState(0)
 
   return (
     <div>
-      {value}
-    <Button 
-      onClick={handleOnClick} 
-      text={"reset this button to zero"}
-    />
-    <Button 
-      onClick={() => setValue(value + 1)} 
-      text={"increment"}
-    />
-    <Button 
-      onClick={() => setValue(value - 1)} 
-      text={"decrement"}
-    />
+      <h1>University of Helinski Unicafe</h1>
+      <h2>Submit Your Feedback</h2>
+      <Button onClick={() => setGood(good + 1)} text={"good"} />
+      <Button onClick={() => setBad(bad + 1)} text={"bad"} />
+      <Button onClick={() => setNeutral(neutral+ 1)} text={"neutral"} />
+      <h2>Results</h2>
+      <Result text={"good: " + good} />
+      <Result text={"bad: " + bad} />
+      <Result text={"neutral: " + neutral} />
     </div>
   )
 }
