@@ -1,43 +1,14 @@
-const Header = (props) => {
+import Note from './components/Note'
+
+const App = ({notes}) => {
   return (
     <>
-    <h1>{props.course}</h1>
-    </>
-  )
-}
-
-const Section = (props) => {
-  return (
-    <>
-    <p>{props.part} {props.exercises}</p>
-    </>
-  )
-}
-
-const Summary = (props) => {
-  return (
-    <>
-    <p>Number of exercises {props.exercises1 + props.exercises2 + props.exercises3}</p>
-    </>
-  )
-}
-
-const App = () => {
-  const course = 'Half Stack application development'
-  const part1 = 'Fundamentals of React'
-  const exercises1 = 10
-  const part2 = 'Using props to pass data'
-  const exercises2 = 7
-  const part3 = 'State of a component'
-  const exercises3 = 14
-
-  return (
-    <>
-      <Header course={course} />
-      <Section part={part1} exercises={exercises1} />
-      <Section part={part2} exercises={exercises2} />
-      <Section part={part3} exercises={exercises3} />
-      <Summary exercises1={exercises1} exercises2={exercises2} exercises3={exercises3} />
+      <h1>Notes</h1>
+      <ul>
+        {notes.map(note => 
+          <Note key={note.id} text={note.content} />
+        )}
+      </ul>
     </>
   )
 }
