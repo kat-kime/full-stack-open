@@ -27,12 +27,33 @@ const Statistics = (props) => {
 
   return (
     <div>
-      <StatisticsLine text={"good: " + props.good} />
-      <StatisticsLine text={"bad: " + props.bad} />
-      <StatisticsLine text={"neutral: " + props.neutral} />
-      <StatisticsLine text={"average: " + props.score/props.total} />
-      <StatisticsLine text={"total: " + props.total} />
-      <StatisticsLine text={"percent good: " + ((props.good / props.total) * 100) + "%"} />
+      <table>
+        <tr>
+          <td>good</td>
+          <td><StatisticsLine text={props.good} />
+          </td>
+        </tr>
+        <tr>
+          <td>bad</td>
+          <td><StatisticsLine text={props.bad} /></td>
+        </tr>
+        <tr>
+          <td>neutral</td>
+          <td><StatisticsLine text={props.neutral} /></td>
+        </tr>
+        <tr>
+          <td>average</td>
+          <td><StatisticsLine text={props.score/props.total} /></td>
+        </tr>
+        <tr>
+          <td>total</td>
+          <td><StatisticsLine text={props.total} /></td>
+        </tr>
+        <tr>
+          <td>percent good</td>
+          <td><StatisticsLine text={((props.good / props.total) * 100) + "%"} /></td>
+        </tr>
+      </table>
     </div>
   )
 
