@@ -63,6 +63,7 @@ const Statistics = (props) => {
 
 const RandomAnecdote = (props) => {
   const [anecdoteIndex, setAnecdoteIndex] = useState(0)
+  const [mostPopularAnecdote, setMostPopularAnecdote] = useState(0)
   const [votes, setVotes] = useState({
     0: 0,
     1: 0,
@@ -73,7 +74,6 @@ const RandomAnecdote = (props) => {
     6: 0,
     7: 0
   })
-
   const anecdotes = [
       'If it hurts, do it more often.',
       'Adding manpower to a late software project makes it later!',
@@ -94,9 +94,16 @@ const RandomAnecdote = (props) => {
 
   const handleAnecdoteVote = () => {
     const copy = { ...votes }
-    copy[anecdoteIndex] += 1
+    const newVotes = copy[anecdoteIndex] += 1
+    copy[anecdoteIndex] = newVotes 
+
+    console.log("newVotes:", newVotes)
 
     setVotes(copy)
+
+    if (newVotes > copy[mostPopularAnecdote]) {
+      setMostPopularAnecdote(anecdoteIndex)
+    }
   }
 
   return (
@@ -107,6 +114,10 @@ const RandomAnecdote = (props) => {
       {anecdotes[anecdoteIndex]}
       <br />
       {"has " + votes[anecdoteIndex] + " votes"}
+      <h3>Anecdote with the most votes</h3>
+      {anecdotes[mostPopularAnecdote]}
+      <br />
+      {"has " + votes[mostPopularAnecdote] + " votes"}
     </div>
   )
 }
