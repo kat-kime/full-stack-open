@@ -1,175 +1,83 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import noteService from './services/notes'
+import Note from './components/Note'
 
-const Entry = ({ entry }) => {
-  return (
-    <>
-    <li>{entry.name}: {entry.number}</li>
-    </>
-  )
-}
+const API_ENDPOINT = 'http://localhost:3001/notes'
 
-const Filter = ({ 
-  newSearchEntry, 
-  handleSearchChange, 
-  findEntry, 
-  handleClear 
-}) => {
-  return (
-    <>
-      <h2>Find Number</h2>
-      <form onSubmit={() => event.preventDefault()}>
-        <div>
-          name: <input value={newSearchEntry} onChange={handleSearchChange} />
-        </div>
-        <div>
-          <button onClick={findEntry}>search</button>
-          <button onClick={handleClear}>clear</button>
-        </div>
-      </form>
-    </>
-  )
-}
-
-const AddForm = ({ 
-  newName,
-  handleNameChange,
-  newPhone,
-  handlePhoneChange,
-  addNewEntry,
-  handleClear
-}) => {
-  return (
-    <>
-      <h2>Add New Number</h2>
-      <form onSubmit={() => event.preventDefault()}>
-        <div>
-          name: <input value={newName} onChange={handleNameChange} />
-        </div>
-        <div>
-          number: <input value={newPhone} onChange={handlePhoneChange} />
-        </div>
-        <div>
-          <button onClick={addNewEntry}>add</button>
-        </div>
-        <div>
-          <button onClick={handleClear}>clear</button>
-        </div>
-      </form>
-    </>
-  )
-}
-
-const Numbers = ({
-  showAll,
-  filteredPersons,
-  persons
-}) => {
-  return (
-    <>
-      <h2>Numbers</h2>
-      <ul>
-        { showAll 
-          ? persons.map( person => 
-            <Entry key={person.id} entry={person} /> 
-          ) 
-          : filteredPersons.map( 
-            person => <Entry key={person.id} entry={person} />
-          )
-        }
-      </ul>
-    </>
-  )
-}
-
-const App = (props) => {
-  const [persons, setPersons] = useState([])
-  const [newName, setNewName] = useState('')
-  const [newPhone, setNewPhone] = useState('')
-  const [newSearchEntry, setNewSearchEntry] = useState('')
-  const [filteredPersons, setFilteredPersons] = useState([])
+const App = () => {
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState('a new note...')
   const [showAll, setShowAll] = useState(true)
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons').then(response => {
-      console.log('data:', response.data)
-      setPersons(response.data)
-    })
+    console.log('effect')
+
+    noteService
+      .getAll()
+      .then(initialNotes => {
+        setNotes(initialNotes)
+      })
   }, [])
-  
 
-  const handleNameChange = (event) => {
-    setNewName(event.target.value)
+  console.log('render', notes.length, 'notes')
+
+  const toggleImportance = (id) => {
+    const note = notes.find(n => n.id === id)
+    const changedNote = { ...note, important: !note.important }
+
+    noteService
+      .update(id, changedNote)
+      .then(updatedNote => setNotes(notes.map(note => 
+        note.id === id 
+        ? updatedNote
+        : note
+      )))
+      .catch(error => {
+        alert(`The note, ${note.content}, was already deleted from the server`)
+        setNotes(notes.filter(note => note.id !== id))
+      })
   }
 
-  const handlePhoneChange = (event) => {
-    setNewPhone(event.target.value)
-  }
+  const notesToShow = showAll 
+    ? notes
+    : notes.filter(note => note.important === true)
 
-  const handleSearchChange = (event) => {
-    setNewSearchEntry(event.target.value)
-  }
-
-  const handleClear = () => {
-    setNewName('')
-    setNewPhone('')
-    setNewSearchEntry('')
-    setShowAll(true)
-  }
-
-  const addNewEntry = () => {
-    if (isNewNamePresent(newName)) {
-      alert(`${newName} is already in the phone book`)
-      setNewName('')
-
-    } else {
-      const newEntry = { 
-        id: persons.length + 1, 
-        name: newName, 
-        number: newPhone 
-      }
-
-      setPersons(persons.concat(newEntry))
-      setNewName('')
-      setNewPhone('')
-    }
-  }
-
-  const findEntry = (event) => {
+  const addNote = (event) => {
     event.preventDefault()
-    setFilteredPersons(persons.filter( 
-      person => person.name.toLowerCase().startsWith(newSearchEntry.toLowerCase()) 
-    ))
-    setShowAll(false)
+    const noteObject = {
+      content: newNote,
+      important: Math.random() < 0.5,
+    }
+    noteService
+      .create(noteObject)
+      .then(note => {
+        setNotes(notes.concat(note))
+        setNewNote('')
+      })
   }
 
-  const isNewNamePresent = (name) => {
-    const found = persons.findIndex( person => person.name === name )
-    return found !== -1
+  const handleNoteChange = (event) => {
+    setNewNote(event.target.value)
   }
 
   return (
     <>
-      <h1>Phonebook</h1>
-      <Filter 
-        newSearchEntry={newSearchEntry} 
-        handleSearchChange={handleSearchChange} 
-        findEntry={findEntry} 
-        handleClear={handleClear}
-      />
-      <AddForm 
-        newName={newName} 
-        handleNameChange={handleNameChange} 
-        newPhone={newPhone} 
-        handlePhoneChange={handlePhoneChange} 
-        addNewEntry={addNewEntry} 
-        handleClear={handleClear} 
-      />
-      <Numbers 
-        showAll={showAll} 
-        filteredPersons={filteredPersons} 
-        persons={persons} 
-      />
+      <h1>Notes</h1>
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? 'important' : 'all'}
+        </button>
+      </div>
+      <ul>
+        {notesToShow.map(note => 
+          <Note key={note.id} note={note} toggleImportance={() => toggleImportance(note.id)}/>
+        )}
+      </ul>
+      <form onSubmit={addNote}>
+        <input value={newNote} onChange={handleNoteChange} />
+        <button type="submit">save</button>
+      </form>
+
     </>
   )
 }
