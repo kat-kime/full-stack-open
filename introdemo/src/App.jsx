@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import contactService from './services/contacts'
 
-const Entry = ({ entry }) => {
+const Entry = ({ entry, deleteContact }) => {
   return (
     <>
     <li>{entry.name}: {entry.number}</li>
+    <button onClick={() => deleteContact(entry.id)}>delete</button>
     </>
   )
 }
@@ -18,7 +19,7 @@ const Filter = ({
   return (
     <>
       <h2>Find Number</h2>
-      <form onSubmit={() => event.preventDefault()}>
+      <form onSubmit={ event => event.preventDefault()}>
         <div>
           name: <input value={newSearchEntry} onChange={handleSearchChange} />
         </div>
@@ -63,7 +64,8 @@ const AddForm = ({
 const Numbers = ({
   showAll,
   filteredPersons,
-  persons
+  persons,
+  deleteContact
 }) => {
   return (
     <>
@@ -71,10 +73,10 @@ const Numbers = ({
       <ul>
         { showAll 
           ? persons.map( person => 
-            <Entry key={person.id} entry={person} /> 
+            <Entry key={person.id} entry={person} deleteContact={deleteContact} /> 
           ) 
           : filteredPersons.map( 
-            person => <Entry key={person.id} entry={person} />
+            person => <Entry key={person.id} entry={person} deleteContact={deleteContact} />
           )
         }
       </ul>
@@ -91,10 +93,9 @@ const App = (props) => {
   const [showAll, setShowAll] = useState(true)
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons').then(response => {
-      console.log('data:', response.data)
-      setPersons(response.data)
-    })
+    contactService
+      .getAll()
+      .then(contacts => setPersons(contacts))
   }, [])
   
 
@@ -117,22 +118,36 @@ const App = (props) => {
     setShowAll(true)
   }
 
+  const deleteContact = id => {
+    const contact = persons.find(person => person.id === id)
+    confirm(`Delete ${contact.name}?`)
+    contactService.del(id).then(setPersons(persons.filter(person => person.id !== id)))
+  }
+
   const addNewEntry = () => {
-    if (isNewNamePresent(newName)) {
-      alert(`${newName} is already in the phone book`)
-      setNewName('')
-
-    } else {
-      const newEntry = { 
-        id: persons.length + 1, 
-        name: newName, 
-        number: newPhone 
-      }
-
-      setPersons(persons.concat(newEntry))
-      setNewName('')
-      setNewPhone('')
+    const newEntry = {
+      name: newName, 
+      number: newPhone
     }
+
+    const existingIndex = persons.findIndex(person => person.name === newName)
+    if (existingIndex !== -1) {
+      const existingContact = persons[existingIndex]
+      if (confirm(`Update number for contact, ${existingContact.name}?`)) {
+        contactService
+          .update(existingContact.id, newEntry)
+          .then(entry => {
+            setPersons(persons.map(person => person.id === existingContact.id ? entry : person))
+          })
+      }
+    } else {
+      contactService
+        .create(newEntry)
+        .then(entry => setPersons(persons.concat(entry)))
+    }
+    
+    setNewName('')
+    setNewPhone('')
   }
 
   const findEntry = (event) => {
@@ -169,6 +184,7 @@ const App = (props) => {
         showAll={showAll} 
         filteredPersons={filteredPersons} 
         persons={persons} 
+        deleteContact={deleteContact}
       />
     </>
   )
