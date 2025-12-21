@@ -1,43 +1,103 @@
-const Header = (props) => {
-  return (
-    <>
-    <h1>{props.course}</h1>
-    </>
-  )
-}
+import { useState, useEffect } from 'react'
+import noteService from './services/notes'
+import Note from './components/Note'
+import Notification from './components/Notification'
 
-const Section = (props) => {
-  return (
-    <>
-    <p>{props.part} {props.exercises}</p>
-    </>
-  )
-}
+const API_ENDPOINT = 'http://localhost:3001/notes'
 
-const Summary = (props) => {
+const Footer = () => {
+  const footerStyle = {
+    color: 'green',
+    fontStyle: 'italic'
+  }
+
   return (
-    <>
-    <p>Number of exercises {props.exercises1 + props.exercises2 + props.exercises3}</p>
-    </>
+    <div style={footerStyle}>
+      <br />
+      <p>Note app, Department of Computer Science, University of Helinski 2025</p>
+    </div>
   )
 }
 
 const App = () => {
-  const course = 'Half Stack application development'
-  const part1 = 'Fundamentals of React'
-  const exercises1 = 10
-  const part2 = 'Using props to pass data'
-  const exercises2 = 7
-  const part3 = 'State of a component'
-  const exercises3 = 14
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState('a new note...')
+  const [showAll, setShowAll] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('some error happened...')
+
+  useEffect(() => {
+    console.log('effect')
+
+    noteService
+      .getAll()
+      .then(initialNotes => {
+        setNotes(initialNotes)
+      })
+  }, [])
+
+  console.log('render', notes.length, 'notes')
+
+  const toggleImportance = (id) => {
+    const note = notes.find(n => n.id === id)
+    const changedNote = { ...note, important: !note.important }
+
+    noteService
+      .update(id, changedNote)
+      .then(updatedNote => setNotes(notes.map(note => 
+        note.id === id 
+        ? updatedNote
+        : note
+      )))
+      .catch(error => {
+        setErrorMessage(`The note, '${note.content}', was already deleted from the server`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000);
+        setNotes(notes.filter(note => note.id !== id))
+      })
+  }
+
+  const notesToShow = showAll 
+    ? notes
+    : notes.filter(note => note.important === true)
+
+  const addNote = (event) => {
+    event.preventDefault()
+    const noteObject = {
+      content: newNote,
+      important: Math.random() < 0.5,
+    }
+    noteService
+      .create(noteObject)
+      .then(note => {
+        setNotes(notes.concat(note))
+        setNewNote('')
+      })
+  }
+
+  const handleNoteChange = (event) => {
+    setNewNote(event.target.value)
+  }
 
   return (
     <>
-      <Header course={course} />
-      <Section part={part1} exercises={exercises1} />
-      <Section part={part2} exercises={exercises2} />
-      <Section part={part3} exercises={exercises3} />
-      <Summary exercises1={exercises1} exercises2={exercises2} exercises3={exercises3} />
+      <h1>Notes</h1>
+      <Notification message={errorMessage} />
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? 'important' : 'all'}
+        </button>
+      </div>
+      <ul>
+        {notesToShow.map(note => 
+          <Note key={note.id} note={note} toggleImportance={() => toggleImportance(note.id)}/>
+        )}
+      </ul>
+      <form onSubmit={addNote}>
+        <input value={newNote} onChange={handleNoteChange} />
+        <button type="submit">save</button>
+      </form>
+      <Footer />
     </>
   )
 }
