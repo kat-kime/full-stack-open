@@ -1,5 +1,5 @@
 import axios from 'axios'
-const BASE_URL = 'http://localhost:3001/notes'
+const BASE_URL = '/api/notes'
 
 const getAll = () => {
 	const nonExistingNote = {
