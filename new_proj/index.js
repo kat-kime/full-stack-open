@@ -75,6 +75,30 @@ app.post('/api/notes', (request, response) => {
   response.json(note)
 })
 
+app.put('/api/notes/:id', (request, response) => {
+  const body = request.body
+  console.log('received note:', body)
+
+  if (!body.content || !body.id) {
+    return response.status(400).json({
+      error: 'missing content or id'
+    })
+  }
+
+  const newNote = {
+    id: body.id,
+    content: body.content,
+    important: body.important || false
+  }
+
+  notes = notes.map(note => note.id === newNote.id 
+    ? newNote 
+    : note
+  )
+
+  response.json(newNote)
+})
+
 app.listen(PORT, () => {
   console.log(`Server running port on ${PORT}`)
 })
