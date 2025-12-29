@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
+    "build:ui": "rm -rf dist && cd ../introdemo && npm run build && cp -r dist ../new_proj",
+    "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push origin HEAD",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Kat Kime",
