@@ -1,15 +1,16 @@
-const express = require('express')
-var morgan = require('morgan')
+import express from 'express'
+import morgan from 'morgan'
 
 const app = express()
-
 app.use(express.json())
 
-PORT = 3001
+const PORT = 3001
 
 morgan.token('body', (request, response) => {
-  const body = request.body
-  return `{ name: ${body.name}, number: ${body.number}}`
+  if (request.body) {
+    const body = request.body
+    return `{ name: ${body.name}, number: ${body.number}}`
+  }
 })
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
@@ -29,7 +30,7 @@ let contacts = [
     { 
       "id": "3",
       "name": "Dan Abramov", 
-      "number": "12-43-234345"
+      "number": "le"
     },
     { 
       "id": "4",
