@@ -19,59 +19,69 @@ app.get('/api/notes', (request, response) => {
   })
 })
 
-app.get('/api/notes/:id', (request, response) => {
+app.get('/api/notes/:id', (request, response, next) => {
   const id = request.params.id
-  return Note.findById(id).then(note => response.json(note))
+  return Note.findById(id)
+    .then(note => response.json(note))
+    .catch(error => next(error))
 })
 
 app.delete('/api/notes/:id', (request, response) => {
   const id = request.params.id
-  notes = notes.filter(note => note.id !== id)
-  response.status(204).end()
+  Note.findByIdAndDelete(id)
+    .then(result => response.status(204).end())
+    .catch(error => next(error))
 })
 
-app.post('/api/notes', (request, response) => {
+app.post('/api/notes', (request, response, next) => {
   const body = request.body
-
-  if (!body.content) {
-    return response.status(400).json({
-      error: 'content missing'
-    })
-  }
 
   const note = new Note({
     content: body.content,
     important: body.important || false
   })
 
-  return note.save().then(savedNote => {
-    response.json(savedNote)
-  })
+  return note.save()
+    .then(savedNote => {
+      response.json(savedNote)
+    })
+    .catch(error => next(error))
 })
 
-app.put('/api/notes/:id', (request, response) => {
-  const body = request.body
-  console.log('received note:', body)
+app.put('/api/notes/:id', (request, response, next) => {
+  const { content, important } = request.body
 
-  if (!body.content || !body.id) {
-    return response.status(400).json({
-      error: 'missing content or id'
+  Note.findById(request.params.id)
+    .then(note => {
+      if (!note) {
+        return response.status(404).end()
+      }
+
+      note.content = content
+      note.important = important
+
+      return note.save().then(updatedNote => response.json(updatedNote))
+    })
+    .catch(error => next(error))
+})
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({
+      error: 'malformatted id'
+    })
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).send({
+      error: error.message
     })
   }
 
-  const newNote = {
-    id: body.id,
-    content: body.content,
-    important: body.important || false
-  }
+  next(error)
+}
 
-  notes = notes.map(note => note.id === newNote.id 
-    ? newNote 
-    : note
-  )
-
-  response.json(newNote)
-})
+app.use(errorHandler)
 
 app.listen(PORT, () => {
   console.log(`Server running port on ${PORT}`)
